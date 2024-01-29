@@ -100,7 +100,7 @@ export const putProduct = async (req, res) => {
       category,
     });
     if (prod) {
-      return res.status(200).send({ status: "success", payload: { prod } });
+      return res.status(200).send({ status: "success", payload: "El producto se ha actualizado correctamente" });
     }
     res.status(404).send({ error: "Producto no encontrado" });
   } catch (error) {

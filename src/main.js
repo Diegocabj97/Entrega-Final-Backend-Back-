@@ -131,7 +131,14 @@ export const sendRecoveryMail = (email, recoveryLink) => {
 
 export const sendTicketToEmail = (ticket) => {
   console.log("Ticket a enviar: " + ticket);
-  const email = ticket.email;
+  const email = ticket && ticket.email;
+  if (!email) {
+    console.log(
+      "Error: No se proporcionó una dirección de correo electrónico válida."
+    );
+    return;
+  }
+
   const products = ticket.products;
   const amount = ticket.amount;
   const code = ticket.code;
@@ -164,22 +171,6 @@ export const sendTicketToEmail = (ticket) => {
   });
 };
 
-app.get("/mail", async (req, res) => {
-  const resultado = await transporter.sendMail({
-    from: MY_EMAIL,
-    to: "diegocabj97@hotmail.com",
-    subject: "Gil",
-    html: `
-    <div>
-      <h1>
-      Este es un mail de prueba
-      </h1>
-      <h2>Más le vale que me arreglen el aire</h2>
-    </div>`,
-  });
-  console.log(resultado);
-  res.send("Email enviado");
-});
 //////////////////////
 //BDD
 mongoose

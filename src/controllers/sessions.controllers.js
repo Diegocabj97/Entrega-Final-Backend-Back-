@@ -84,7 +84,6 @@ export const logout = async (req, res) => {
     /* if (req.session.login) {
       req.session.destroy();
     } */
-    console.log("Cookie " + req.cookies.jwtCookie);
     req.logout();
     if (req.cookies.jwtCookie) {
       res.clearCookie("jwtCookie");

@@ -27,7 +27,7 @@ export const authorization = (role) => {
       // Verificar si req.user existe y tiene el rol correcto
       if (!req.cookies.jwtCookie || req.headers.role !== role) {
         console.log(req.headers.role);
-        return console.log("Usuario no tiene los permisos necesarios");
+        return res.status(401).send("Usuario no tiene los permisos necesarios");
       }
 
       // Si todo está bien, permitir el acceso
