@@ -14,10 +14,10 @@ const ExtractJWT = jwt.ExtractJwt; //Extrar de las cookies el token
 const initializePassport = () => {
   const cookieExtractor = (req) => {
     const token =
+      req.headers.authorization ||
       req.headers.jwtcookie ||
       req.signedCookies.jwtCookie ||
       req.cookies.jwtCookie;
-    console.log("cookieExtractor", token);
     return token;
   };
 
@@ -30,10 +30,9 @@ const initializePassport = () => {
       },
       async (jwt_payload, done) => {
         try {
-          console.log("JWT", jwt_payload);
           done(null, jwt_payload.user); // Puedes acceder directamente a jwt_payload.user
         } catch (error) {
-          done(error);
+          done("Error " + error);
         }
       }
     )
@@ -76,7 +75,7 @@ const initializePassport = () => {
 
           return done(null, userCreated);
         } catch (error) {
-          return done(error);
+          return done("Hubo un error al registrarse" + error);
         }
       }
     )

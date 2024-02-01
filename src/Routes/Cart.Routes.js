@@ -15,14 +15,9 @@ const cartRouter = Router();
 //Authorization: Limita quien puede acceder a cada ruta mediante passport
 
 cartRouter.get("/", getCarts);
-cartRouter.get("/:cid", getCart);
-cartRouter.post("/:cid/product/:pid/", postCart);
-cartRouter.put(
-  "/:cid/product/:pid",
-  authorization("user"),
-
-  putCart
-);
+cartRouter.get("/:cid", authorization("user"), getCart);
+cartRouter.post("/:cid/product/:pid/", authorization("user"), postCart);
+cartRouter.put("/:cid/product/:pid", authorization("user"), putCart);
 cartRouter.delete(
   "/:cid/",
   authorization("user"),

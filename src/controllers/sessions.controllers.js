@@ -28,7 +28,6 @@ export const login = async (req, res) => {
         httpOnly: false,
         sameSite: "None",
       };
-
       res.cookie("jwtCookie", token, cookieOptions);
 
       const userId = req.user._id;
@@ -51,7 +50,7 @@ export const login = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error al iniciar sesión:", error);
+    res.status(404).send("Error al iniciar sesión: ", error);
     res
       .status(500)
       .send({ mensaje: `Error al iniciar sesión: ${error.message || error}` });
@@ -71,7 +70,7 @@ export const register = async (req, res) => {
         .send({ status: "error", payload: "Error en el registro" });
     }
   } catch (error) {
-    console.error(error);
+    res.status(404).send(error);
     return res
       .status(500)
       .send({ status: "error", payload: "Hubo un error al registrar usuario" });
@@ -82,13 +81,15 @@ export const logout = async (req, res) => {
   try {
     //Si la sesión se crea en la BDD
     /* if (req.session.login) {
-      req.session.destroy();
+    
     } */
-    req.logout();
+    req.session.destroy();
+    if (req.cookies) {
+      res.clearCookie("connect.sid");
+    }
     if (req.cookies.jwtCookie) {
       res.clearCookie("jwtCookie");
-      res.clearCookie("cartid");
-      res.redirect("/");
+
       res
         .status(200)
         .send({ payload: "Usuario deslogeado", status: "success" });
@@ -104,12 +105,15 @@ export const logout = async (req, res) => {
 };
 
 export const tryJwt = async (req, res) => {
-  console.log(req);
   res.send(req.user);
 };
 
 export const current = async (req, res) => {
-  res.send(req.user);
+  if (req.user) {
+    res.status(200).send(req.user);
+  } else {
+    res.status(404).send("No se ha encontrado req.user");
+  }
 };
 
 export const GithubLogin = async (req, res) => {

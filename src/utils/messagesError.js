@@ -3,20 +3,20 @@ import passport from "passport";
 //Funcion general para retornar errores es las estrategias de passport
 
 export const passportError = (strategy) => {
-  //Voy a enviar local, github o jwt
-  return async (req, res, next) => {
-    passport.authenticate(strategy, (error, user, info) => {
+  return (req, res, next) => {
+    passport.authenticate(strategy, (error, user) => {
       if (error) {
-        return next(error); //Que la funcion que me llame maneje como va a responder ante mi error
+        return next(error);
       }
-      if (!user) {
-        return res
-          .status(401)
-          .send({ error: info.messages ? info.messages : info.toString() });
+      if (!req.user) {
+        // Aquí manejas el caso en el que no hay un usuario autenticado
+        return res.status(401).send({
+          error: "Usted no ha iniciado sesion",
+        });
       }
-      req.user = user;
+      user = req.user;
       next();
-    })(req, res, next); //Esto es por que me va a llamar un middleware
+    })(req, res, next); // Invoca la función authenticate aquí
   };
 };
 
@@ -25,15 +25,18 @@ export const authorization = (role) => {
   return async (req, res, next) => {
     try {
       // Verificar si req.user existe y tiene el rol correcto
-      if (!req.cookies.jwtCookie || req.headers.role !== role) {
-        console.log(req.headers.role);
+      if (
+        req.cookies.jwtCookie ||
+        req.headers.role === role ||
+        req.user.role === role
+      ) {
+        next();
+      } else {
         return res.status(401).send("Usuario no tiene los permisos necesarios");
       }
 
       // Si todo está bien, permitir el acceso
-      next();
     } catch (error) {
-      console.error("Error en middleware de autorización:", error);
       return res.status(500).send({ error: "Error en el servidor" });
     }
   };

@@ -25,8 +25,11 @@ export const getCart = async (req, res) => {
 };
 export const postCart = async (req, res) => {
   const { cid, pid } = req.params;
+  const { quantity } = req.body;
+
   try {
     const cart = await CartModel.findById(cid).populate("products");
+
     if (cart) {
       const prod = await productModel.findById(pid);
 
@@ -34,14 +37,16 @@ export const postCart = async (req, res) => {
         const indice = cart.products.findIndex(
           (product) => product._id._id.toString() === pid
         );
+
         if (indice !== -1) {
-          // Incrementar la cantidad en 1 cada vez que se agrega
+          // Incrementar la cantidad según el cuerpo de la solicitud o por defecto 1
           const prodIndex = cart.products[indice];
-          prodIndex.quantity += 1;
+          prodIndex.quantity += quantity || 1;
         } else {
-          // Agregar un nuevo producto al carrito
-          cart.products.push({ _id: prod, quantity: 1 });
+          // Agregar un nuevo producto al carrito con la cantidad según el cuerpo de la solicitud o por defecto 1
+          cart.products.push({ _id: prod, quantity: quantity || 1 });
         }
+
         // Recalcular el total
         const total = cart.products.reduce((acc, product) => {
           const productTotal = product.quantity * product._id.price;
