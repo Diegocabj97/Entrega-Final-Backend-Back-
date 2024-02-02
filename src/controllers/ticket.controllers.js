@@ -8,6 +8,7 @@ import { sendTicketToEmail } from "../main.js";
 const generarCodeUnico = () => {
   return uuidv4();
 };
+
 export const postCompra = async (req, res) => {
   const cartId = req.params.cid;
   const userEmail = req.user ? req.user.email : req.headers["user-email"];
@@ -18,32 +19,37 @@ export const postCompra = async (req, res) => {
     if (!cart) {
       return res.status(404).send("Carrito no encontrado");
     }
+
     if (cart.products.length === 0) {
-      return null;
+      return res
+        .status(200)
+        .send("Carrito vacío, no se ha realizado ninguna compra");
     }
+
     let insufficientStock = false;
 
     for (const item of cart.products) {
       const product = item._id;
       const quantity = item.quantity;
 
-      if (product.stock >= quantity) {
-        product.stock -= quantity;
-        await product.save();
-      } else {
+      if (product.stock < quantity) {
         insufficientStock = true;
-        res
-          .status(201)
-          .send(`un producto fue eliminado del carrito por falta de stock`);
+        // Filtrar productos con stock suficiente
         cart.products = cart.products.filter(
           (cartItem) => cartItem._id.toString() !== product._id.toString()
         );
+        break;
       }
+
+      product.stock -= quantity;
+      await product.save();
     }
 
     if (insufficientStock) {
-      res.status(401).send("Stock insuficiente");
-      return res.redirect("/");
+      // Salir temprano si hay falta de stock
+      return res
+        .status(401)
+        .send("No hay stock suficiente para finalizar la compra");
     }
 
     const total = cart.products.reduce(
@@ -54,36 +60,32 @@ export const postCompra = async (req, res) => {
     cart.default = [{ products: cart.products, total }];
     await cart.save();
 
-    try {
-      const ticket = new ticketModel({
-        products: cart.products.map((item) => ({
-          id: item._id,
-          title: item._id.title,
-          quantity: item.quantity,
-          price: item._id.price,
-        })),
-        amount: total,
-        email: userEmail,
-        purchaser: cart._id,
-        code: generarCodeUnico(),
-      });
-      console.log("Productos del carrito" + ticket);
-      await ticket.save();
-      sendTicketToEmail(ticket);
-      cart.products = [];
-      cart.total = 0;
-      await cart.save();
-      res.status(200).send("Ticket creado, gracias por su compra");
-    } catch (error) {
-      res.status(500).send({
-        respuesta: "Error al crear el ticket",
-        mensaje: error.message || "Error desconocido al crear el ticket",
-      });
-    }
+    const ticket = new ticketModel({
+      products: cart.products.map((item) => ({
+        id: item._id,
+        title: item._id.title,
+        quantity: item.quantity,
+        price: item._id.price,
+      })),
+      amount: total,
+      email: userEmail,
+      purchaser: cart._id,
+      code: generarCodeUnico(),
+    });
+
+    await ticket.save();
+    sendTicketToEmail(ticket);
+
+    // Limpiar el carrito después de la compra
+    cart.products = [];
+    cart.total = 0;
+    await cart.save();
+
+    return res.status(200).send("Ticket creado, gracias por su compra");
   } catch (error) {
-    return res.status(404).send({
-      respuesta: "Error al chequear el carrito",
-      mensaje: error.message || "Error desconocido al chequear el carrito",
+    return res.status(500).send({
+      respuesta: "Error al procesar la compra",
+      mensaje: error.message || "Error desconocido al procesar la compra",
     });
   }
 };
