@@ -72,7 +72,6 @@ export const postCompra = async (req, res) => {
       purchaser: cart._id,
       code: generarCodeUnico(),
     });
-
     await ticket.save();
     sendTicketToEmail(ticket);
 
@@ -85,7 +84,7 @@ export const postCompra = async (req, res) => {
   } catch (error) {
     return res.status(500).send({
       respuesta: "Error al procesar la compra",
-      mensaje: error.message || "Error desconocido al procesar la compra",
+      mensaje: error || "Error desconocido al procesar la compra",
     });
   }
 };

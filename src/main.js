@@ -151,6 +151,7 @@ export const sendTicketToEmail = (ticket) => {
     <div style="align-items: center;text-align: center;">
       <h1 style="color: #333;font-weight: bold;">Confirmamos su compra!</h1>
       <h1 style="color: #666;font-weight: bold;">Contactenos por whatsapp para coordinar su entrega</h1>
+    <a href="https://wa.me/5491159148462?text=Hola!%20Me%20comunico%20porque...">Whatsapp</a>
       <h1 style="color: #777;font-weight: bold;">Estos son los productos que recibirás</h1>
       ${products.map(
         (product) => `

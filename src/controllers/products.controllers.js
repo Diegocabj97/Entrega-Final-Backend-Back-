@@ -62,8 +62,16 @@ export const postProduct = async (req, res) => {
   }
 };
 export const postProductWImage = async (req, res) => {
-  const { title, description, code, price, stock, category, quantity, image } =
-    req.body;
+  const {
+    title,
+    description,
+    code,
+    price,
+    stock,
+    category,
+    quantity,
+    thumbnail,
+  } = req.body;
 
   try {
     const prod = await productModel.create({
@@ -74,7 +82,7 @@ export const postProductWImage = async (req, res) => {
       stock,
       category,
       quantity,
-      image,
+      thumbnail,
     });
     if (prod) {
       return res.status(200).send({ status: "success", payload: { prod } });
@@ -100,7 +108,10 @@ export const putProduct = async (req, res) => {
       category,
     });
     if (prod) {
-      return res.status(200).send({ status: "success", payload: "El producto se ha actualizado correctamente" });
+      return res.status(200).send({
+        status: "success",
+        payload: "El producto se ha actualizado correctamente",
+      });
     }
     res.status(404).send({ error: "Producto no encontrado" });
   } catch (error) {

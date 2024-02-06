@@ -14,7 +14,11 @@ const productSchema = new Schema({
     type: Number,
     required: true,
   },
-  thumbnail: [],
+  thumbnail: [
+    {
+      type: String,
+    },
+  ],
   stock: {
     type: Number,
     required: true,
